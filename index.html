@@ -59,7 +59,6 @@
 
   .app { position: relative; z-index: 1; width: 100%; max-width: 480px; }
 
-  /* Header */
   .header { text-align: center; margin-bottom: 28px; }
   .header .month-badge {
     display: inline-block;
@@ -84,7 +83,6 @@
   }
   .header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
 
-  /* Progress */
   .progress-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -110,7 +108,6 @@
   }
   @keyframes fadeUp { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: none; } }
 
-  /* Card list */
   #card-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 
   .cc-card {
@@ -133,29 +130,18 @@
   @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
   @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-  /* Bank logo icon */
   .cc-icon {
     width: 42px; height: 42px; border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; overflow: hidden; transition: opacity 0.3s;
+    flex-shrink: 0; overflow: hidden;
   }
-  .cc-icon.has-logo {
-    background: #fff;
-    padding: 6px;
-  }
+  .cc-icon.has-logo { background: #fff; padding: 5px; }
   .cc-icon.no-logo {
     background: linear-gradient(135deg, var(--accent), var(--accent2));
-    font-size: 20px;
+    font-size: 18px; font-weight: 700; color: #fff;
   }
-  .cc-icon img {
-    width: 100%; height: 100%;
-    object-fit: contain;
-    display: block;
-    border-radius: 4px;
-  }
-  .cc-card.paid .cc-icon.no-logo {
-    background: linear-gradient(135deg, #16a34a, var(--green));
-  }
+  .cc-icon img { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 3px; }
+  .cc-card.paid .cc-icon.no-logo { background: linear-gradient(135deg, #16a34a, var(--green)); }
 
   .cc-name { flex: 1; font-size: 15px; font-weight: 600; transition: color 0.2s; }
   .cc-card.paid .cc-name { color: var(--green); }
@@ -165,20 +151,19 @@
     width: 26px; height: 26px; border-radius: 50%;
     border: 2px solid var(--border);
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; font-size: 14px; transition: all 0.2s;
+    flex-shrink: 0; font-size: 13px; transition: all 0.2s;
   }
   .cc-card.paid .cc-toggle { background: var(--green); border-color: var(--green); color: #fff; }
   .cc-delete {
     width: 28px; height: 28px; border-radius: 8px; border: none;
     background: transparent; color: var(--muted); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 16px; opacity: 0;
+    font-size: 14px; opacity: 0;
     transition: opacity 0.2s, background 0.2s, color 0.2s; flex-shrink: 0;
   }
   .cc-card:hover .cc-delete { opacity: 1; }
   .cc-delete:hover { background: rgba(248,113,113,0.15); color: var(--danger); }
 
-  /* Add row */
   .add-row { display: flex; gap: 10px; margin-bottom: 28px; }
   .add-input {
     flex: 1; background: var(--surface); border: 1px solid var(--border);
@@ -190,9 +175,9 @@
   .add-input:focus { border-color: var(--accent); }
   .add-btn {
     background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; border: none; border-radius: 14px; padding: 12px 18px;
-    font-size: 20px; cursor: pointer; transition: transform 0.15s;
-    display: flex; align-items: center; justify-content: center;
+    color: #fff; border: none; border-radius: 14px; padding: 12px 20px;
+    font-size: 22px; font-weight: 300; cursor: pointer; transition: transform 0.15s;
+    display: flex; align-items: center; justify-content: center; line-height: 1;
   }
   .add-btn:hover { transform: scale(1.06); }
   .add-btn:active { transform: scale(0.96); }
@@ -207,7 +192,7 @@
   #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 999; }
 
   .empty { text-align: center; padding: 32px 0; color: var(--muted); font-size: 14px; }
-  .empty .emoji { font-size: 36px; display: block; margin-bottom: 8px; }
+  .empty svg { display: block; margin: 0 auto 12px; opacity: 0.4; }
 </style>
 </head>
 <body>
@@ -227,18 +212,18 @@
       <span class="progress-count"><span id="paid-count">0</span> / <span id="total-count">0</span> paid</span>
     </div>
     <div class="bar-bg"><div class="bar-fill" id="bar-fill"></div></div>
-    <div class="all-done-msg" id="all-done">ð All bills paid this month!</div>
+    <div class="all-done-msg" id="all-done">All bills paid this month!</div>
   </div>
 
   <div id="card-list"></div>
 
   <div class="add-row">
     <input class="add-input" id="add-input" type="text" placeholder="Add a card (e.g. HDFC Regalia)" maxlength="60">
-    <button class="add-btn" id="add-btn" title="Add card">ï¼</button>
+    <button class="add-btn" id="add-btn" title="Add card">+</button>
   </div>
 
   <div class="reset-note">
-    ð Paid status <strong>resets automatically</strong> on the 1st of every month.<br>
+    Paid status <strong>resets automatically</strong> on the 1st of every month.<br>
     Your cards are always remembered.
   </div>
 </div>
@@ -246,8 +231,6 @@
 <script>
 const STORAGE_KEY = 'cc_tracker_v2';
 
-// Bank keyword â domain mapping
-// Checked in order â put more specific entries first
 const BANK_MAP = [
   { kw: ['amazon pay icici', 'amazon pay'],  domain: 'amazon.in' },
   { kw: ['makemytrip icici', 'makemytrip'],  domain: 'makemytrip.com' },
@@ -260,7 +243,7 @@ const BANK_MAP = [
   { kw: ['axis'],                            domain: 'axisbank.com' },
   { kw: ['kotak'],                           domain: 'kotak.com' },
   { kw: ['yes bank', 'yesbank'],             domain: 'yesbank.in' },
-  { kw: ['idfc first', 'idfc'],             domain: 'idfcfirstbank.com' },
+  { kw: ['idfc first', 'idfc'],              domain: 'idfcfirstbank.com' },
   { kw: ['indusind'],                        domain: 'indusind.com' },
   { kw: ['amex', 'american express'],        domain: 'americanexpress.com' },
   { kw: ['federal bank', 'federal'],         domain: 'federalbank.co.in' },
@@ -274,7 +257,7 @@ const BANK_MAP = [
   { kw: ['union bank'],                      domain: 'unionbankofindia.co.in' },
   { kw: ['citi', 'citibank'],               domain: 'online.citibank.co.in' },
   { kw: ['hsbc'],                            domain: 'hsbc.co.in' },
-  { kw: ['bank of india', ' boi '],          domain: 'bankofindia.co.in' },
+  { kw: ['bank of india'],                   domain: 'bankofindia.co.in' },
   { kw: ['onecard', 'one card'],             domain: 'getonecard.app' },
   { kw: ['slice'],                           domain: 'sliceit.com' },
 ];
@@ -288,7 +271,7 @@ function getBankDomain(cardName) {
 }
 
 function logoUrl(domain) {
-  return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+  return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=64';
 }
 
 function getMonthKey() {
@@ -320,36 +303,46 @@ function setMonthBadge() {
     d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
 }
 
+function bankInitials(cardName) {
+  const words = cardName.trim().split(/\s+/);
+  return words.length >= 2
+    ? (words[0][0] + words[1][0]).toUpperCase()
+    : words[0].substring(0, 2).toUpperCase();
+}
+
 function renderIcon(cardName) {
   const domain = getBankDomain(cardName);
   if (domain) {
-    return `<div class="cc-icon has-logo">
-      <img src="${logoUrl(domain)}" alt=""
-           onerror="this.parentElement.className='cc-icon no-logo';this.parentElement.textContent='ð¦';">
-    </div>`;
+    return '<div class="cc-icon has-logo">' +
+      '<img src="' + logoUrl(domain) + '" alt="" ' +
+      'onerror="this.parentElement.className=\'cc-icon no-logo\';this.parentElement.textContent=\'' + bankInitials(cardName) + '\'">' +
+      '</div>';
   }
-  return `<div class="cc-icon no-logo">ð¦</div>`;
+  return '<div class="cc-icon no-logo">' + bankInitials(cardName) + '</div>';
 }
 
 function render() {
   const list = document.getElementById('card-list');
   list.innerHTML = '';
   if (data.cards.length === 0) {
-    list.innerHTML = '<div class="empty"><span class="emoji">ð</span>No cards yet â add one below!</div>';
+    list.innerHTML = '<div class="empty">' +
+      '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+      '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>' +
+      '</svg>No cards yet &mdash; add one below!</div>';
   } else {
-    data.cards.forEach(card => {
+    data.cards.forEach(function(card) {
       const isPaid = !!data.payments[card.id];
       const el = document.createElement('div');
       el.className = 'cc-card' + (isPaid ? ' paid' : '');
       el.dataset.id = card.id;
       el.innerHTML =
         renderIcon(card.name) +
-        `<div class="cc-name">${escapeHtml(card.name)}</div>` +
-        `<div class="cc-status">${isPaid ? 'â Paid' : 'Pending'}</div>` +
-        `<div class="cc-toggle">${isPaid ? 'â' : ''}</div>` +
-        `<button class="cc-delete" data-id="${card.id}" title="Remove">â</button>`;
-      el.addEventListener('click', e => { if (!e.target.closest('.cc-delete')) togglePaid(card.id); });
-      el.querySelector('.cc-delete').addEventListener('click', e => { e.stopPropagation(); removeCard(card.id); });
+        '<div class="cc-name">' + escapeHtml(card.name) + '</div>' +
+        '<div class="cc-status">' + (isPaid ? '&#10003; Paid' : 'Pending') + '</div>' +
+        '<div class="cc-toggle">' + (isPaid ? '&#10003;' : '') + '</div>' +
+        '<button class="cc-delete" data-id="' + card.id + '" title="Remove">&#10005;</button>';
+      el.addEventListener('click', function(e) { if (!e.target.closest('.cc-delete')) togglePaid(card.id); });
+      el.querySelector('.cc-delete').addEventListener('click', function(e) { e.stopPropagation(); removeCard(card.id); });
       list.appendChild(el);
     });
   }
@@ -358,7 +351,7 @@ function render() {
 
 function updateProgress() {
   const total = data.cards.length;
-  const paid = data.cards.filter(c => data.payments[c.id]).length;
+  const paid = data.cards.filter(function(c) { return data.payments[c.id]; }).length;
   document.getElementById('paid-count').textContent = paid;
   document.getElementById('total-count').textContent = total;
   document.getElementById('bar-fill').style.width = (total ? Math.round(paid/total*100) : 0) + '%';
@@ -372,21 +365,21 @@ function togglePaid(id) {
   saveData(data); render();
 }
 function removeCard(id) {
-  data.cards = data.cards.filter(c => c.id !== id);
+  data.cards = data.cards.filter(function(c) { return c.id !== id; });
   delete data.payments[id]; saveData(data); render();
 }
 function addCard(name) {
   name = name.trim();
   if (!name) return;
-  data.cards.push({ id: 'card_' + Date.now(), name });
+  data.cards.push({ id: 'card_' + Date.now(), name: name });
   saveData(data); render();
 }
 
-document.getElementById('add-btn').addEventListener('click', () => {
+document.getElementById('add-btn').addEventListener('click', function() {
   const i = document.getElementById('add-input');
   addCard(i.value); i.value = ''; i.focus();
 });
-document.getElementById('add-input').addEventListener('keydown', e => {
+document.getElementById('add-input').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') {
     const i = document.getElementById('add-input');
     addCard(i.value); i.value = '';
@@ -397,23 +390,23 @@ function escapeHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Confetti
-let confettiRunning = false;
+var confettiRunning = false;
 function triggerConfetti() {
   if (confettiRunning) return;
   confettiRunning = true;
   const canvas = document.getElementById('confetti-canvas');
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  const pieces = Array.from({length:120}, () => ({
+  const colors = ['#6c63ff','#a78bfa','#22c55e','#facc15','#f472b6','#38bdf8'];
+  const pieces = Array.from({length:120}, function() { return {
     x: Math.random()*canvas.width, y: -20, r: 4+Math.random()*6, d: 2+Math.random()*4,
-    color: ['#6c63ff','#a78bfa','#22c55e','#facc15','#f472b6','#38bdf8'][Math.floor(Math.random()*6)],
+    color: colors[Math.floor(Math.random()*6)],
     tilt: Math.random()*10-5, tiltAngle: 0, tiltSpeed: 0.1+Math.random()*0.2
-  }));
-  let frame = 0;
+  }; });
+  var frame = 0;
   (function draw() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    pieces.forEach(p => {
+    pieces.forEach(function(p) {
       ctx.beginPath(); ctx.lineWidth = p.r; ctx.strokeStyle = p.color;
       ctx.moveTo(p.x+p.tilt+p.r/3, p.y); ctx.lineTo(p.x+p.tilt, p.y+p.tilt+p.r*0.8); ctx.stroke();
       p.tiltAngle += p.tiltSpeed; p.y += p.d+1; p.tilt = Math.sin(p.tiltAngle)*15;
