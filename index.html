@@ -59,6 +59,7 @@
 
   .app { position: relative; z-index: 1; width: 100%; max-width: 480px; }
 
+  /* Header */
   .header { text-align: center; margin-bottom: 28px; }
   .header .month-badge {
     display: inline-block;
@@ -83,6 +84,7 @@
   }
   .header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
 
+  /* Progress */
   .progress-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -108,6 +110,7 @@
   }
   @keyframes fadeUp { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: none; } }
 
+  /* Card list */
   #card-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 
   .cc-card {
@@ -130,13 +133,30 @@
   @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
   @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
+  /* Bank logo icon */
   .cc-icon {
     width: 42px; height: 42px; border-radius: 12px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
     display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0; transition: background 0.3s;
+    flex-shrink: 0; overflow: hidden; transition: opacity 0.3s;
   }
-  .cc-card.paid .cc-icon { background: linear-gradient(135deg, #16a34a, var(--green)); }
+  .cc-icon.has-logo {
+    background: #fff;
+    padding: 6px;
+  }
+  .cc-icon.no-logo {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    font-size: 20px;
+  }
+  .cc-icon img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    display: block;
+    border-radius: 4px;
+  }
+  .cc-card.paid .cc-icon.no-logo {
+    background: linear-gradient(135deg, #16a34a, var(--green));
+  }
+
   .cc-name { flex: 1; font-size: 15px; font-weight: 600; transition: color 0.2s; }
   .cc-card.paid .cc-name { color: var(--green); }
   .cc-status { font-size: 12px; color: var(--muted); transition: color 0.2s; }
@@ -158,6 +178,7 @@
   .cc-card:hover .cc-delete { opacity: 1; }
   .cc-delete:hover { background: rgba(248,113,113,0.15); color: var(--danger); }
 
+  /* Add row */
   .add-row { display: flex; gap: 10px; margin-bottom: 28px; }
   .add-input {
     flex: 1; background: var(--surface); border: 1px solid var(--border);
@@ -170,7 +191,7 @@
   .add-btn {
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     color: #fff; border: none; border-radius: 14px; padding: 12px 18px;
-    font-size: 20px; cursor: pointer; transition: transform 0.15s, opacity 0.2s;
+    font-size: 20px; cursor: pointer; transition: transform 0.15s;
     display: flex; align-items: center; justify-content: center;
   }
   .add-btn:hover { transform: scale(1.06); }
@@ -203,28 +224,72 @@
   <div class="progress-wrap">
     <div class="progress-top">
       <span class="progress-label">Monthly progress</span>
-      <span class="progress-count" id="count-text"><span id="paid-count">0</span> / <span id="total-count">0</span> paid</span>
+      <span class="progress-count"><span id="paid-count">0</span> / <span id="total-count">0</span> paid</span>
     </div>
     <div class="bar-bg"><div class="bar-fill" id="bar-fill"></div></div>
-    <div class="all-done-msg" id="all-done">🎉 All bills paid this month!</div>
+    <div class="all-done-msg" id="all-done">ð All bills paid this month!</div>
   </div>
 
   <div id="card-list"></div>
 
   <div class="add-row">
-    <input class="add-input" id="add-input" type="text" placeholder="Add a card (e.g. HDFC Regalia)" maxlength="40">
-    <button class="add-btn" id="add-btn" title="Add card">＋</button>
+    <input class="add-input" id="add-input" type="text" placeholder="Add a card (e.g. HDFC Regalia)" maxlength="60">
+    <button class="add-btn" id="add-btn" title="Add card">ï¼</button>
   </div>
 
   <div class="reset-note">
-    🔄 Paid status <strong>resets automatically</strong> on the 1st of every month.<br>
+    ð Paid status <strong>resets automatically</strong> on the 1st of every month.<br>
     Your cards are always remembered.
   </div>
 </div>
 
 <script>
 const STORAGE_KEY = 'cc_tracker_v2';
-const ICONS = ['🏦','🪙','💰','🏧','⚡','🎯','💎','🌟','🔵','💠'];
+
+// Bank keyword â domain mapping
+// Checked in order â put more specific entries first
+const BANK_MAP = [
+  { kw: ['amazon pay icici', 'amazon pay'],  domain: 'amazon.in' },
+  { kw: ['makemytrip icici', 'makemytrip'],  domain: 'makemytrip.com' },
+  { kw: ['kiwi yes bank', 'kiwi'],           domain: 'kiwicredit.in' },
+  { kw: ['scapia federal', 'scapia'],        domain: 'scapia.in' },
+  { kw: ['stable money'],                    domain: 'stablemoney.in' },
+  { kw: ['sbi', 'state bank'],               domain: 'sbi.co.in' },
+  { kw: ['icici'],                           domain: 'icicibank.com' },
+  { kw: ['hdfc'],                            domain: 'hdfcbank.com' },
+  { kw: ['axis'],                            domain: 'axisbank.com' },
+  { kw: ['kotak'],                           domain: 'kotak.com' },
+  { kw: ['yes bank', 'yesbank'],             domain: 'yesbank.in' },
+  { kw: ['idfc first', 'idfc'],             domain: 'idfcfirstbank.com' },
+  { kw: ['indusind'],                        domain: 'indusind.com' },
+  { kw: ['amex', 'american express'],        domain: 'americanexpress.com' },
+  { kw: ['federal bank', 'federal'],         domain: 'federalbank.co.in' },
+  { kw: ['bobcard', 'bank of baroda', 'bob'], domain: 'bankofbaroda.in' },
+  { kw: ['suryoday'],                        domain: 'suryodaybank.com' },
+  { kw: ['rbl'],                             domain: 'rblbank.com' },
+  { kw: ['au small', 'au bank'],             domain: 'aubank.in' },
+  { kw: ['standard chartered'],             domain: 'sc.com' },
+  { kw: ['pnb', 'punjab national'],          domain: 'pnbindia.in' },
+  { kw: ['canara'],                          domain: 'canarabank.com' },
+  { kw: ['union bank'],                      domain: 'unionbankofindia.co.in' },
+  { kw: ['citi', 'citibank'],               domain: 'online.citibank.co.in' },
+  { kw: ['hsbc'],                            domain: 'hsbc.co.in' },
+  { kw: ['bank of india', ' boi '],          domain: 'bankofindia.co.in' },
+  { kw: ['onecard', 'one card'],             domain: 'getonecard.app' },
+  { kw: ['slice'],                           domain: 'sliceit.com' },
+];
+
+function getBankDomain(cardName) {
+  const name = cardName.toLowerCase();
+  for (const b of BANK_MAP) {
+    if (b.kw.some(k => name.includes(k))) return b.domain;
+  }
+  return null;
+}
+
+function logoUrl(domain) {
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+}
 
 function getMonthKey() {
   const d = new Date();
@@ -251,28 +316,40 @@ let data = loadData();
 
 function setMonthBadge() {
   const d = new Date();
-  document.getElementById('month-badge').textContent = d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  document.getElementById('month-badge').textContent =
+    d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+}
+
+function renderIcon(cardName) {
+  const domain = getBankDomain(cardName);
+  if (domain) {
+    return `<div class="cc-icon has-logo">
+      <img src="${logoUrl(domain)}" alt=""
+           onerror="this.parentElement.className='cc-icon no-logo';this.parentElement.textContent='ð¦';">
+    </div>`;
+  }
+  return `<div class="cc-icon no-logo">ð¦</div>`;
 }
 
 function render() {
   const list = document.getElementById('card-list');
   list.innerHTML = '';
   if (data.cards.length === 0) {
-    list.innerHTML = '<div class="empty"><span class="emoji">🃏</span>No cards yet — add one below!</div>';
+    list.innerHTML = '<div class="empty"><span class="emoji">ð</span>No cards yet â add one below!</div>';
   } else {
-    data.cards.forEach((card, idx) => {
+    data.cards.forEach(card => {
       const isPaid = !!data.payments[card.id];
       const el = document.createElement('div');
       el.className = 'cc-card' + (isPaid ? ' paid' : '');
       el.dataset.id = card.id;
       el.innerHTML =
-        '<div class="cc-icon">' + ICONS[idx % ICONS.length] + '</div>' +
-        '<div class="cc-name">' + escapeHtml(card.name) + '</div>' +
-        '<div class="cc-status">' + (isPaid ? '✓ Paid' : 'Pending') + '</div>' +
-        '<div class="cc-toggle">' + (isPaid ? '✓' : '') + '</div>' +
-        '<button class="cc-delete" data-id="' + card.id + '" title="Remove">✕</button>';
-      el.addEventListener('click', (e) => { if (!e.target.closest('.cc-delete')) togglePaid(card.id); });
-      el.querySelector('.cc-delete').addEventListener('click', (e) => { e.stopPropagation(); removeCard(card.id); });
+        renderIcon(card.name) +
+        `<div class="cc-name">${escapeHtml(card.name)}</div>` +
+        `<div class="cc-status">${isPaid ? 'â Paid' : 'Pending'}</div>` +
+        `<div class="cc-toggle">${isPaid ? 'â' : ''}</div>` +
+        `<button class="cc-delete" data-id="${card.id}" title="Remove">â</button>`;
+      el.addEventListener('click', e => { if (!e.target.closest('.cc-delete')) togglePaid(card.id); });
+      el.querySelector('.cc-delete').addEventListener('click', e => { e.stopPropagation(); removeCard(card.id); });
       list.appendChild(el);
     });
   }
@@ -284,24 +361,43 @@ function updateProgress() {
   const paid = data.cards.filter(c => data.payments[c.id]).length;
   document.getElementById('paid-count').textContent = paid;
   document.getElementById('total-count').textContent = total;
-  document.getElementById('bar-fill').style.width = (total === 0 ? 0 : Math.round(paid/total*100)) + '%';
-  const allDone = document.getElementById('all-done');
-  if (total > 0 && paid === total) { allDone.style.display = 'block'; triggerConfetti(); }
-  else { allDone.style.display = 'none'; }
+  document.getElementById('bar-fill').style.width = (total ? Math.round(paid/total*100) : 0) + '%';
+  const msg = document.getElementById('all-done');
+  if (total > 0 && paid === total) { msg.style.display = 'block'; triggerConfetti(); }
+  else msg.style.display = 'none';
 }
 
 function togglePaid(id) {
   if (data.payments[id]) delete data.payments[id]; else data.payments[id] = true;
   saveData(data); render();
 }
-function removeCard(id) { data.cards = data.cards.filter(c => c.id !== id); delete data.payments[id]; saveData(data); render(); }
-function addCard(name) { name = name.trim(); if (!name) return; data.cards.push({ id: 'card_' + Date.now(), name }); saveData(data); render(); }
+function removeCard(id) {
+  data.cards = data.cards.filter(c => c.id !== id);
+  delete data.payments[id]; saveData(data); render();
+}
+function addCard(name) {
+  name = name.trim();
+  if (!name) return;
+  data.cards.push({ id: 'card_' + Date.now(), name });
+  saveData(data); render();
+}
 
-document.getElementById('add-btn').addEventListener('click', () => { const i = document.getElementById('add-input'); addCard(i.value); i.value = ''; i.focus(); });
-document.getElementById('add-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { const i = document.getElementById('add-input'); addCard(i.value); i.value = ''; } });
+document.getElementById('add-btn').addEventListener('click', () => {
+  const i = document.getElementById('add-input');
+  addCard(i.value); i.value = ''; i.focus();
+});
+document.getElementById('add-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const i = document.getElementById('add-input');
+    addCard(i.value); i.value = '';
+  }
+});
 
-function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
+// Confetti
 let confettiRunning = false;
 function triggerConfetti() {
   if (confettiRunning) return;
