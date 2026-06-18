@@ -250,45 +250,51 @@ function load() {
 function save(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
 let data = load();
 
+/* ---- BANK MAP: always maps to the ISSUING BANK domain, never the brand ---- */
 const BANK_MAP = [
-  { kw: ['amazon pay icici','amazon pay'], domain: 'amazon.in' },
-  { kw: ['makemytrip icici','makemytrip'], domain: 'makemytrip.com' },
-  { kw: ['kiwi yes bank','kiwi'],          domain: 'yesbank.in' },
-  { kw: ['scapia federal','scapia'],       domain: 'federalbank.co.in' },
-  { kw: ['stablemoney','stable money'],    domain: 'stablemoney.in' },
-  { kw: ['sbi','state bank of india'],     domain: 'sbicard.com' },
-  { kw: ['icici'],                         domain: 'icicibank.com' },
-  { kw: ['hdfc'],                          domain: 'hdfcbank.com' },
-  { kw: ['axis'],                          domain: 'axisbank.com' },
-  { kw: ['kotak'],                         domain: 'kotak.com' },
-  { kw: ['yes bank','yesbank'],            domain: 'yesbank.in' },
-  { kw: ['idfc first','idfc'],             domain: 'idfcfirstbank.com' },
-  { kw: ['indusind'],                      domain: 'indusind.com' },
-  { kw: ['amex','american express'],       domain: 'americanexpress.com' },
-  { kw: ['federal bank','federal'],        domain: 'federalbank.co.in' },
-  { kw: ['bobcard','bank of baroda','bob'],domain: 'bankofbaroda.in' },
-  { kw: ['suryoday'],                      domain: 'suryodaybank.com' },
-  { kw: ['rbl'],                           domain: 'rblbank.com' },
-  { kw: ['au small','au bank','aubank'],   domain: 'aubank.in' },
-  { kw: ['standard chartered','stanchart'],domain: 'sc.com' },
-  { kw: ['pnb','punjab national'],         domain: 'pnbindia.in' },
-  { kw: ['canara'],                        domain: 'canarabank.com' },
-  { kw: ['union bank'],                    domain: 'unionbankofindia.co.in' },
-  { kw: ['citi','citibank'],               domain: 'citibank.com' },
-  { kw: ['hsbc'],                          domain: 'hsbc.com' },
-  { kw: ['bank of india'],                 domain: 'bankofindia.co.in' },
-  { kw: ['onecard','one card'],            domain: 'getonecard.app' },
-  { kw: ['slice'],                         domain: 'sliceit.com' },
-  { kw: ['bajaj','bajaj finserv'],         domain: 'bajajfinserv.in' },
-  { kw: ['tata neu','tata'],              domain: 'tatacapital.com' },
-  { kw: ['airtel'],                        domain: 'airtel.in' },
-  { kw: ['flipkart axis','flipkart'],      domain: 'flipkart.com' },
-  { kw: ['paytm'],                         domain: 'paytm.com' },
-  { kw: ['swiggy','swiggy hdfc'],          domain: 'swiggy.com' },
-  { kw: ['zomato'],                        domain: 'zomato.com' },
+  /* Co-branded: keyword order matters - more specific first */
+  { kw: ['amazon pay icici','amazon pay'],       domain: 'icicibank.com' },
+  { kw: ['makemytrip icici','makemytrip'],       domain: 'icicibank.com' },
+  { kw: ['coral icici','coral rupay icici'],     domain: 'icicibank.com' },
+  { kw: ['kiwi yes bank','kiwi'],                domain: 'yesbank.in' },
+  { kw: ['scapia federal','scapia'],             domain: 'federalbank.co.in' },
+  { kw: ['stable money suryoday','stablemoney','stable money'], domain: 'suryodaybank.com' },
+  { kw: ['flipkart axis','flipkart'],            domain: 'axisbank.com' },
+  { kw: ['swiggy hdfc','swiggy'],               domain: 'hdfcbank.com' },
+  { kw: ['zomato hdfc','zomato'],               domain: 'hdfcbank.com' },
+  { kw: ['tata neu hdfc','tata neu'],           domain: 'hdfcbank.com' },
+  { kw: ['tata neu sbi'],                       domain: 'sbicard.com' },
+  { kw: ['airtel axis','airtel'],               domain: 'axisbank.com' },
+  { kw: ['ola money sbi','ola'],                domain: 'sbicard.com' },
+  /* Standalone banks */
+  { kw: ['sbi','state bank of india'],           domain: 'sbicard.com' },
+  { kw: ['icici'],                               domain: 'icicibank.com' },
+  { kw: ['hdfc'],                                domain: 'hdfcbank.com' },
+  { kw: ['axis'],                                domain: 'axisbank.com' },
+  { kw: ['kotak'],                               domain: 'kotak.com' },
+  { kw: ['yes bank','yesbank'],                  domain: 'yesbank.in' },
+  { kw: ['idfc first','idfc'],                   domain: 'idfcfirstbank.com' },
+  { kw: ['indusind'],                            domain: 'indusind.com' },
+  { kw: ['amex','american express'],             domain: 'americanexpress.com' },
+  { kw: ['federal bank','federal'],              domain: 'federalbank.co.in' },
+  { kw: ['bobcard','bank of baroda','bob'],      domain: 'bankofbaroda.in' },
+  { kw: ['suryoday'],                            domain: 'suryodaybank.com' },
+  { kw: ['rbl'],                                 domain: 'rblbank.com' },
+  { kw: ['au small','au bank','aubank'],         domain: 'aubank.in' },
+  { kw: ['standard chartered','stanchart'],      domain: 'sc.com' },
+  { kw: ['pnb','punjab national'],               domain: 'pnbindia.in' },
+  { kw: ['canara'],                              domain: 'canarabank.com' },
+  { kw: ['union bank'],                          domain: 'unionbankofindia.co.in' },
+  { kw: ['citi','citibank'],                     domain: 'citibank.com' },
+  { kw: ['hsbc'],                                domain: 'hsbc.com' },
+  { kw: ['bank of india'],                       domain: 'bankofindia.co.in' },
+  { kw: ['onecard','one card'],                  domain: 'getonecard.app' },
+  { kw: ['slice'],                               domain: 'sliceit.com' },
+  { kw: ['bajaj','bajaj finserv'],               domain: 'bajajfinserv.in' },
+  { kw: ['paytm'],                               domain: 'paytmbank.com' },
 ];
 
-const STOP = new Set(['gold','silver','platinum','titanium','regalia','infinia','sapphire','emerald','credit','card','debit','signature','classic','elite','prime','select','visa','mastercard','rupay','amex','diners','club','pro','lite','plus','super','ultra','premier','prestige','infinite','world','privilege','cashback','rewards','miles','travel','fuel','shopping','life','style','ace','pulse','duo','edge','flex','freedom','velocity','bonus','pay','neu','coral','millennia','moneyback','digiplus','digital','simply','click','save','biz','business','corporate']);
+const STOP = new Set(['gold','silver','platinum','titanium','regalia','infinia','sapphire','emerald','credit','card','debit','signature','classic','elite','prime','select','visa','mastercard','rupay','amex','diners','club','pro','lite','plus','super','ultra','premier','prestige','infinite','world','privilege','cashback','rewards','miles','travel','fuel','shopping','life','style','ace','pulse','duo','edge','flex','freedom','velocity','bonus','pay','neu','coral','millennia','moneyback','digiplus','digital','simply','click','save','biz','business','corporate','tiger','rewards']);
 
 function bankDomain(name) {
   const low = name.toLowerCase();
@@ -299,28 +305,48 @@ function inferDomain(name) {
   const words = name.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/s+/).filter(w => w.length > 1 && !STOP.has(w));
   return words.length ? words[0] + 'bank.com' : null;
 }
-function logoSources(domain) {
-  return ['https://logo.clearbit.com/' + domain, 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=128'];
-}
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function initials(name) {
   const words = name.trim().split(/s+/).filter(w => !STOP.has(w.toLowerCase()));
   return words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : name.trim().substring(0,2).toUpperCase();
 }
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+/* ---- LOGO LOADING with globe-detection fix ----
+   Google favicon returns a 16x16 globe placeholder (HTTP 200) for unknown domains.
+   onerror never fires. We detect it via naturalWidth < 32 in onload and skip to initials. */
 function makeLogo(cardName) {
   const domain = bankDomain(cardName) || inferDomain(cardName);
   const inits = esc(initials(cardName));
   if (!domain) return '<div class="cc-logo no-logo">' + inits + '</div>';
-  const srcs = logoSources(domain);
-  return '<div class="cc-logo has-logo"><img src="' + esc(srcs[0]) + '" data-fb="' + esc(srcs[1]) + '" data-inits="' + inits + '" onerror="logoFallback(this)" alt="' + inits + '" loading="lazy"></div>';
+  const primary = esc('https://logo.clearbit.com/' + domain);
+  const fallback = esc('https://www.google.com/s2/favicons?domain=' + domain + '&sz=128');
+  return '<div class="cc-logo has-logo"><img src="' + primary + '" ' +
+    'data-fb="' + fallback + '" data-inits="' + inits + '" ' +
+    'onerror="logoErr(this)" onload="logoLoad(this)" alt="' + inits + '" loading="lazy"></div>';
 }
-function logoFallback(img) {
-  const fb = img.getAttribute('data-fb'), inits = img.getAttribute('data-inits'), tried = img.getAttribute('data-tried') || '';
-  if (fb && tried !== fb) { img.setAttribute('data-tried', fb); img.src = fb; }
-  else { const w = img.parentElement; w.className = 'cc-logo no-logo'; w.textContent = inits; }
+
+function logoLoad(img) {
+  /* Google favicon returns 16x16 globe for unknown domains — skip it */
+  if (img.naturalWidth < 32 && img.getAttribute('data-tried')) {
+    showInits(img);
+  }
 }
-window.logoFallback = logoFallback;
+function logoErr(img) {
+  const fb = img.getAttribute('data-fb');
+  const tried = img.getAttribute('data-tried') || '';
+  if (fb && tried !== fb) {
+    img.setAttribute('data-tried', fb);
+    img.src = fb;
+  } else {
+    showInits(img);
+  }
+}
+function showInits(img) {
+  const w = img.parentElement;
+  if (w) { w.className = 'cc-logo no-logo'; w.textContent = img.getAttribute('data-inits'); }
+}
+window.logoErr = logoErr;
+window.logoLoad = logoLoad;
 
 function render() {
   const list = document.getElementById('card-list');
@@ -375,7 +401,6 @@ function confetti() {
   var f=0;
   (function draw(){ctx.clearRect(0,0,c.width,c.height);bits.forEach(function(p){ctx.beginPath();ctx.lineWidth=p.r;ctx.strokeStyle=p.col;var tx=Math.sin(p.t)*14;ctx.moveTo(p.x+tx,p.y);ctx.lineTo(p.x+tx+p.r*0.4,p.y+p.r);ctx.stroke();p.t+=p.ts;p.y+=p.d+0.8;});if(++f<200)requestAnimationFrame(draw);else{ctx.clearRect(0,0,c.width,c.height);confettiRunning=false;}})();
 }
-
 render();
 </script>
 </body>
